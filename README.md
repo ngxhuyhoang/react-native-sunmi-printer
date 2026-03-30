@@ -7,7 +7,7 @@
 
 React Native library for Sunmi built-in printers. Supports Sunmi V2S and newer devices (Android 11+).
 
-Built with **React Native New Architecture** (TurboModule).
+Built with **React Native New Architecture** (TurboModule) and **Sunmi PrinterX SDK**.
 
 ---
 
@@ -146,8 +146,8 @@ const state = await updatePrinterState();
 | `getPrinterSerialNo()` | `Promise<string>` | Printer serial number                  |
 | `getPrinterVersion()`  | `Promise<string>` | Firmware version                       |
 | `getPrinterModal()`    | `Promise<string>` | Device model                           |
-| `getPrinterPaper()`    | `Promise<number>` | Paper size (1=58mm, other=80mm)        |
-| `getPrinterMode()`     | `Promise<number>` | Mode (0=normal, 1=black mark, 2=label) |
+| `getPrinterPaper()`    | `Promise<number>` | Paper width in mm (58 or 80)           |
+| `getPrinterMode()`     | `Promise<number>` | Mode (0=thermal, 1=black mark, 2=label) |
 | `getServiceVersion()`  | `Promise<string>` | Print service version                  |
 | `getFirmwareStatus()`  | `Promise<number>` | Firmware status                        |
 | `updatePrinterState()` | `Promise<number>` | Current printer state                  |
@@ -172,9 +172,9 @@ const state = await updatePrinterState();
 | Method                        | Description                               |
 | ----------------------------- | ----------------------------------------- |
 | `setAlignment(alignment)`     | Set alignment (0=left, 1=center, 2=right) |
-| `setFontName(typeface)`       | Set font (`"gh"` for built-in monospace)  |
+| `setFontName(typeface)`       | ~~Not supported in PrinterX SDK~~         |
 | `setFontSize(fontsize)`       | Set font size                             |
-| `setPrinterStyle(key, value)` | Set printer style (bold, underline, etc.) |
+| `setPrinterStyle(key, value)` | ~~Not supported in PrinterX SDK~~         |
 
 </details>
 
@@ -195,7 +195,7 @@ const state = await updatePrinterState();
 | Method                            | Description                                             |
 | --------------------------------- | ------------------------------------------------------- |
 | `printImage(base64)`              | Print base64-encoded image                              |
-| `printBitmapCustom(base64, type)` | Print with mode (0=default, 1=black&white, 2=grayscale) |
+| `printBitmapCustom(base64, type)` | Print with mode (0=binarization, 1=dithering) |
 
 > Max width: 384px (58mm) or 576px (80mm). Call `lineWrap()` after printing to feed paper.
 
@@ -216,8 +216,8 @@ const state = await updatePrinterState();
 
 | Method                                      | Description                                    |
 | ------------------------------------------- | ---------------------------------------------- |
-| `printColumnsText(texts, widths, aligns)`   | Print columns (widths in character count)      |
-| `printColumnsString(texts, widths, aligns)` | Print columns (widths as proportional weights) |
+| `printColumnsText(texts, widths, aligns)`   | Print columns (widths as proportional weights) |
+| `printColumnsString(texts, widths, aligns)` | Alias for `printColumnsText`                   |
 
 </details>
 
@@ -247,8 +247,8 @@ const state = await updatePrinterState();
 
 | Method          | Description                      |
 | --------------- | -------------------------------- |
-| `labelLocate()` | Locate label position            |
-| `labelOutput()` | Push label to cutter for peeling |
+| `labelLocate()` | ~~Not supported in PrinterX SDK~~ |
+| `labelOutput()` | ~~Not supported in PrinterX SDK~~ |
 
 </details>
 
@@ -257,7 +257,7 @@ const state = await updatePrinterState();
 
 | Method                                | Description                                |
 | ------------------------------------- | ------------------------------------------ |
-| `sendLCDCommand(flag)`                | LCD command (1=init, 2=on, 3=off, 4=clear) |
+| `sendLCDCommand(flag)`                | LCD command (1=init, 2=wake, 3=sleep, 4=clear) |
 | `sendLCDFillString(text, size, fill)` | Display text on LCD                        |
 | `sendLCDMultiString(texts, align)`    | Display multi-line text on LCD             |
 | `sendLCDBitmap(base64)`               | Display image on LCD                       |

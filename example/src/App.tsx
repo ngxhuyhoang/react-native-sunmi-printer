@@ -112,7 +112,7 @@ export default function App() {
           `Serial: ${serial}`,
           `Version: ${version}`,
           `Model: ${model}`,
-          `Paper: ${paper === 1 ? '58mm' : '80mm'}`,
+          `Paper: ${paper}mm`,
           `Mode: ${mode}`,
           `Service: ${serviceVer}`,
           `Firmware: ${firmware}`,
@@ -268,10 +268,10 @@ export default function App() {
 
   const handlePrintBitmapCustom = async () => {
     try {
-      // type: 0=default, 1=black&white, 2=grayscale
-      await printBitmapCustom(SAMPLE_BASE64, 2);
+      // type: 0=binarization, 1=dithering
+      await printBitmapCustom(SAMPLE_BASE64, 1);
       await lineWrap(3);
-      showResult('printBitmapCustom (grayscale)', 'OK');
+      showResult('printBitmapCustom (dithering)', 'OK');
     } catch (e) {
       showError(e);
     }
@@ -313,10 +313,10 @@ export default function App() {
 
   const handlePrintColumnsText = async () => {
     try {
-      // widths in character count
-      await printColumnsText(['Name', 'Qty', 'Price'], [16, 4, 8], [0, 1, 2]);
-      await printColumnsText(['Coffee', '2', '$6.00'], [16, 4, 8], [0, 1, 2]);
-      await printColumnsText(['Donut', '3', '$4.50'], [16, 4, 8], [0, 1, 2]);
+      // widths as proportional weights
+      await printColumnsText(['Name', 'Qty', 'Price'], [2, 1, 1], [0, 1, 2]);
+      await printColumnsText(['Coffee', '2', '$6.00'], [2, 1, 1], [0, 1, 2]);
+      await printColumnsText(['Donut', '3', '$4.50'], [2, 1, 1], [0, 1, 2]);
       await lineWrap(3);
       showResult('printColumnsText', 'OK');
     } catch (e) {
@@ -536,7 +536,7 @@ export default function App() {
       <Section title="Image">
         <Button title="Print Image" onPress={handlePrintImage} />
         <Button
-          title="Print Bitmap Custom (Grayscale)"
+          title="Print Bitmap Custom (Dithering)"
           onPress={handlePrintBitmapCustom}
         />
       </Section>
