@@ -287,6 +287,14 @@ const state = await updatePrinterState();
 
 ---
 
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website.
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-EA4AAA.svg?style=flat&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/ngxhuyhoang)
+
+<a href="https://buymeacoffee.com/hoangnh0099" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Beer" height="40"></a>
+
 ## Contributing
 
 See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
