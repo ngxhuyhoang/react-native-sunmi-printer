@@ -16,11 +16,7 @@
     "src",
     "lib",
     "android",
-    "ios",
-    "cpp",
-    "*.podspec",
     "react-native.config.js",
-    "!ios/build",
     "!android/build",
     "!android/gradle",
     "!android/gradlew",
@@ -160,7 +156,7 @@
   },
   "create-react-native-library": {
     "type": "turbo-module",
-    "languages": "kotlin-objc",
+    "languages": "kotlin-only",
     "tools": [
       "eslint",
       "jest",

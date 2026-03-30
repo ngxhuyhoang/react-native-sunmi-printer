@@ -1,7 +1,10 @@
 {
-  "model": "opus",
-  "effortLevel": "high",
   "permissions": {
     "allow": ["Bash(yarn install:*)"]
+  },
+  "model": "opus",
+  "effortLevel": "high",
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true
   }
 }

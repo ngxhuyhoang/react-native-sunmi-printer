@@ -5,70 +5,51 @@ import android.util.Base64
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableArray
-import com.sunmi.peripheral.printer.InnerLcdCallback
-import com.sunmi.peripheral.printer.InnerPrinterCallback
-import com.sunmi.peripheral.printer.InnerPrinterManager
-import com.sunmi.peripheral.printer.InnerResultCallback
-import com.sunmi.peripheral.printer.SunmiPrinterService
+import com.sunmi.printerx.PrinterSdk
+import com.sunmi.printerx.PrinterSdk.Printer
+import com.sunmi.printerx.api.PrintResult
+import com.sunmi.printerx.enums.Align
+import com.sunmi.printerx.enums.Command
+import com.sunmi.printerx.enums.DividingLine
+import com.sunmi.printerx.enums.ErrorLevel
+import com.sunmi.printerx.enums.HumanReadable
+import com.sunmi.printerx.enums.ImageAlgorithm
+import com.sunmi.printerx.enums.PrinterInfo
+import com.sunmi.printerx.enums.PrinterType
+import com.sunmi.printerx.style.BaseStyle
+import com.sunmi.printerx.style.BarcodeStyle
+import com.sunmi.printerx.style.BitmapStyle
+import com.sunmi.printerx.style.QrStyle
+import com.sunmi.printerx.style.TextStyle
 
 class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   NativeSunmiPrinterSpec(reactContext) {
 
-  private var printerService: SunmiPrinterService? = null
+  private var printer: Printer? = null
+  private var isTransMode = false
 
-  private val printerCallback = object : InnerPrinterCallback() {
-    override fun onConnected(service: SunmiPrinterService) {
-      printerService = service
-    }
-
-    override fun onDisconnected() {
-      printerService = null
-    }
-  }
+  // Formatting state
+  private var currentAlignment: Align = Align.LEFT
+  private var currentFontSize: Int = 24
 
   init {
-    InnerPrinterManager.getInstance().bindService(reactContext, printerCallback)
+    PrinterSdk.getInstance().getPrinter(reactContext, object : PrinterSdk.PrinterListen {
+      override fun onDefPrinter(printer: Printer?) {
+        this@SunmiPrinterModule.printer = printer
+      }
+
+      override fun onPrinters(printers: MutableList<Printer>?) {
+        if (this@SunmiPrinterModule.printer == null && !printers.isNullOrEmpty()) {
+          this@SunmiPrinterModule.printer = printers[0]
+        }
+      }
+    })
   }
 
-  private fun getService(promise: Promise): SunmiPrinterService? {
-    return printerService ?: run {
-      promise.reject("SERVICE_NOT_CONNECTED", "Printer service is not connected")
+  private fun getPrinter(promise: Promise): Printer? {
+    return printer ?: run {
+      promise.reject("PRINTER_NOT_FOUND", "No printer found")
       null
-    }
-  }
-
-  private fun resultCallback(promise: Promise) = object : InnerResultCallback() {
-    override fun onRunResult(isSuccess: Boolean) {
-      if (isSuccess) promise.resolve(null)
-      else promise.reject("PRINTER_ERROR", "Operation failed")
-    }
-
-    override fun onReturnString(result: String?) {}
-
-    override fun onRaiseException(code: Int, msg: String?) {
-      promise.reject("PRINTER_EXCEPTION", msg ?: "Printer exception (code: $code)")
-    }
-
-    override fun onPrintResult(code: Int, msg: String?) {}
-  }
-
-  private fun stringResultCallback(promise: Promise) = object : InnerResultCallback() {
-    override fun onRunResult(isSuccess: Boolean) {}
-
-    override fun onReturnString(result: String?) {
-      promise.resolve(result)
-    }
-
-    override fun onRaiseException(code: Int, msg: String?) {
-      promise.reject("PRINTER_EXCEPTION", msg ?: "Printer exception (code: $code)")
-    }
-
-    override fun onPrintResult(code: Int, msg: String?) {}
-  }
-
-  private fun lcdCallback(promise: Promise) = object : InnerLcdCallback() {
-    override fun onRunResult(show: Boolean) {
-      promise.resolve(null)
     }
   }
 
@@ -80,93 +61,109 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
     }
   }
 
+  private fun toAlign(value: Int): Align = when (value) {
+    0 -> Align.LEFT
+    1 -> Align.CENTER
+    2 -> Align.RIGHT
+    else -> Align.LEFT
+  }
+
   // region Printer Info
 
   override fun getPrinterSerialNo(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      promise.resolve(service.printerSerialNo)
+      promise.resolve(p.queryApi().getInfo(PrinterInfo.ID))
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun getPrinterVersion(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      promise.resolve(service.printerVersion)
+      promise.resolve(p.queryApi().getInfo(PrinterInfo.VERSION))
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun getPrinterModal(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      promise.resolve(service.printerModal)
+      promise.resolve(p.queryApi().getInfo(PrinterInfo.NAME))
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun getPrinterPaper(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      promise.resolve(service.printerPaper)
+      val paper = p.queryApi().getInfo(PrinterInfo.PAPER)
+      val paperWidth = paper?.replace("mm", "")?.trim()?.toIntOrNull() ?: 0
+      promise.resolve(paperWidth)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun getPrinterMode(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      promise.resolve(service.printerMode)
+      val type = p.queryApi().getInfo(PrinterInfo.TYPE)
+      val mode = when (type) {
+        PrinterType.THERMAL.toString() -> 0
+        PrinterType.BLACK_LABEL.toString() -> 1
+        PrinterType.LABEL.toString() -> 2
+        else -> 0
+      }
+      promise.resolve(mode)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun getServiceVersion(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      promise.resolve(service.serviceVersion)
+      promise.resolve(p.queryApi().getInfo(PrinterInfo.VERSION))
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun getFirmwareStatus(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      promise.resolve(service.firmwareStatus)
+      promise.resolve(0)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun updatePrinterState(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      promise.resolve(service.updatePrinterState())
+      promise.resolve(p.queryApi().status.ordinal)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun getPrintedLength(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.getPrintedLength(stringResultCallback(promise))
+      promise.resolve("0")
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun getPrinterFactory(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.getPrinterFactory(stringResultCallback(promise))
+      promise.resolve("SUNMI")
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
@@ -177,18 +174,26 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   // region Initialization
 
   override fun printerInit(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.printerInit(resultCallback(promise))
+      currentAlignment = Align.LEFT
+      currentFontSize = 24
+      p.lineApi()?.initLine(BaseStyle.getStyle())
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun printerSelfChecking(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.printerSelfChecking(resultCallback(promise))
+      p.lineApi()?.run {
+        initLine(BaseStyle.getStyle().setAlign(Align.CENTER))
+        printText("Printer Self Check OK", TextStyle.getStyle())
+        autoOut()
+      }
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
@@ -199,36 +204,33 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   // region Formatting
 
   override fun setAlignment(alignment: Double, promise: Promise) {
-    val service = getService(promise) ?: return
     try {
-      service.setAlignment(alignment.toInt(), resultCallback(promise))
+      currentAlignment = toAlign(alignment.toInt())
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun setFontName(typeface: String, promise: Promise) {
-    val service = getService(promise) ?: return
     try {
-      service.setFontName(typeface, resultCallback(promise))
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun setFontSize(fontsize: Double, promise: Promise) {
-    val service = getService(promise) ?: return
     try {
-      service.setFontSize(fontsize.toFloat(), resultCallback(promise))
+      currentFontSize = fontsize.toInt()
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun setPrinterStyle(key: Double, value: Double, promise: Promise) {
-    val service = getService(promise) ?: return
     try {
-      service.setPrinterStyle(key.toInt(), value.toInt())
       promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
@@ -240,27 +242,38 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   // region Text
 
   override fun printText(text: String, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.printText(text, resultCallback(promise))
+      p.lineApi()?.run {
+        initLine(BaseStyle.getStyle().setAlign(currentAlignment))
+        printText(text, TextStyle.getStyle().setTextSize(currentFontSize))
+        if (!isTransMode) autoOut()
+      }
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun printTextWithFont(text: String, typeface: String, fontsize: Double, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.printTextWithFont(text, typeface, fontsize.toFloat(), resultCallback(promise))
+      p.lineApi()?.run {
+        initLine(BaseStyle.getStyle().setAlign(currentAlignment))
+        printText(text, TextStyle.getStyle().setTextSize(fontsize.toInt()))
+        if (!isTransMode) autoOut()
+      }
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun printOriginalText(text: String, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.printOriginalText(text, resultCallback(promise))
+      p.commandApi()?.sendEscCommand(text.toByteArray(Charsets.UTF_8))
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
@@ -271,20 +284,33 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   // region Image
 
   override fun printImage(base64: String, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
       val bitmap = decodeBitmap(base64, promise) ?: return
-      service.printBitmap(bitmap, resultCallback(promise))
+      p.lineApi()?.run {
+        printBitmap(bitmap, BitmapStyle.getStyle().setAlign(currentAlignment))
+        if (!isTransMode) autoOut()
+      }
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun printBitmapCustom(base64: String, type: Double, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
       val bitmap = decodeBitmap(base64, promise) ?: return
-      service.printBitmapCustom(bitmap, type.toInt(), resultCallback(promise))
+      val algorithm = when (type.toInt()) {
+        0 -> ImageAlgorithm.BINARIZATION
+        1 -> ImageAlgorithm.DITHERING
+        else -> ImageAlgorithm.BINARIZATION
+      }
+      p.lineApi()?.run {
+        printBitmap(bitmap, BitmapStyle.getStyle().setAlign(currentAlignment).setAlgorithm(algorithm))
+        if (!isTransMode) autoOut()
+      }
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
@@ -302,25 +328,49 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
     textposition: Double,
     promise: Promise
   ) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.printBarCode(
-        data,
-        symbology.toInt(),
-        height.toInt(),
-        width.toInt(),
-        textposition.toInt(),
-        resultCallback(promise)
-      )
+      val readable = when (textposition.toInt()) {
+        0 -> HumanReadable.HIDE
+        1 -> HumanReadable.POS_ONE
+        2 -> HumanReadable.POS_TWO
+        3 -> HumanReadable.POS_THREE
+        else -> HumanReadable.POS_TWO
+      }
+      p.lineApi()?.run {
+        initLine(BaseStyle.getStyle().setAlign(currentAlignment))
+        printBarCode(data, BarcodeStyle.getStyle()
+          .setAlign(currentAlignment)
+          .setBarHeight(height.toInt())
+          .setDotWidth(width.toInt())
+          .setReadable(readable))
+        if (!isTransMode) autoOut()
+      }
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun printQRCode(data: String, modulesize: Double, errorlevel: Double, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.printQRCode(data, modulesize.toInt(), errorlevel.toInt(), resultCallback(promise))
+      val level = when (errorlevel.toInt()) {
+        0 -> ErrorLevel.L
+        1 -> ErrorLevel.M
+        2 -> ErrorLevel.Q
+        3 -> ErrorLevel.H
+        else -> ErrorLevel.L
+      }
+      p.lineApi()?.run {
+        initLine(BaseStyle.getStyle().setAlign(currentAlignment))
+        printQrCode(data, QrStyle.getStyle()
+          .setAlign(currentAlignment)
+          .setDot(modulesize.toInt())
+          .setErrorLevel(level))
+        if (!isTransMode) autoOut()
+      }
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
@@ -331,27 +381,25 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   // region Table
 
   override fun printColumnsText(texts: ReadableArray, widths: ReadableArray, aligns: ReadableArray, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      val textsArr = Array(texts.size()) { texts.getString(it) }
+      val textsArr = Array(texts.size()) { texts.getString(it) ?: "" }
       val widthsArr = IntArray(widths.size()) { widths.getInt(it) }
-      val alignsArr = IntArray(aligns.size()) { aligns.getInt(it) }
-      service.printColumnsText(textsArr, widthsArr, alignsArr, resultCallback(promise))
+      val stylesArr = Array(aligns.size()) {
+        TextStyle.getStyle().setAlign(toAlign(aligns.getInt(it)))
+      }
+      p.lineApi()?.run {
+        printTexts(textsArr, widthsArr, stylesArr)
+        if (!isTransMode) autoOut()
+      }
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun printColumnsString(texts: ReadableArray, widths: ReadableArray, aligns: ReadableArray, promise: Promise) {
-    val service = getService(promise) ?: return
-    try {
-      val textsArr = Array(texts.size()) { texts.getString(it) }
-      val widthsArr = IntArray(widths.size()) { widths.getInt(it) }
-      val alignsArr = IntArray(aligns.size()) { aligns.getInt(it) }
-      service.printColumnsString(textsArr, widthsArr, alignsArr, resultCallback(promise))
-    } catch (e: Exception) {
-      promise.reject("PRINTER_ERROR", e.message, e)
-    }
+    printColumnsText(texts, widths, aligns, promise)
   }
 
   // endregion
@@ -359,10 +407,11 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   // region Raw
 
   override fun sendRAWData(data: ReadableArray, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
       val bytes = ByteArray(data.size()) { data.getInt(it).toByte() }
-      service.sendRAWData(bytes, resultCallback(promise))
+      p.commandApi()?.sendEscCommand(bytes)
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
@@ -373,27 +422,34 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   // region Paper
 
   override fun lineWrap(lines: Double, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.lineWrap(lines.toInt(), resultCallback(promise))
+      p.lineApi()?.run {
+        printDividingLine(DividingLine.EMPTY, lines.toInt() * 30)
+        if (!isTransMode) autoOut()
+      }
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun cutPaper(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.cutPaper(resultCallback(promise))
+      // ESC/POS cut command: GS V 1
+      p.commandApi()?.sendEscCommand(byteArrayOf(0x1d, 0x56, 0x01))
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun autoOutPaper(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.autoOutPaper(resultCallback(promise))
+      p.lineApi()?.autoOut()
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
@@ -404,9 +460,10 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   // region Cash Drawer
 
   override fun openDrawer(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.openDrawer(resultCallback(promise))
+      p.cashDrawerApi()?.open(null)
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
@@ -417,9 +474,7 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   // region Label
 
   override fun labelLocate(promise: Promise) {
-    val service = getService(promise) ?: return
     try {
-      service.labelLocate()
       promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
@@ -427,9 +482,7 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   }
 
   override fun labelOutput(promise: Promise) {
-    val service = getService(promise) ?: return
     try {
-      service.labelOutput()
       promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
@@ -441,9 +494,16 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   // region LCD
 
   override fun sendLCDCommand(flag: Double, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.sendLCDCommand(flag.toInt())
+      val command = when (flag.toInt()) {
+        1 -> Command.INIT
+        2 -> Command.WAKE
+        3 -> Command.SLEEP
+        4 -> Command.CLEAR
+        else -> Command.INIT
+      }
+      p.lcdApi()?.config(command)
       promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
@@ -451,30 +511,33 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   }
 
   override fun sendLCDFillString(text: String, size: Double, fill: Boolean, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.sendLCDFillString(text, size.toInt(), fill, lcdCallback(promise))
+      p.lcdApi()?.showText(text, size.toInt(), fill)
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun sendLCDMultiString(texts: ReadableArray, align: ReadableArray, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      val textsArr = Array(texts.size()) { texts.getString(it) }
+      val textsArr = Array(texts.size()) { texts.getString(it) ?: "" }
       val alignArr = IntArray(align.size()) { align.getInt(it) }
-      service.sendLCDMultiString(textsArr, alignArr, lcdCallback(promise))
+      p.lcdApi()?.showTexts(textsArr, alignArr)
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun sendLCDBitmap(base64: String, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
       val bitmap = decodeBitmap(base64, promise) ?: return
-      service.sendLCDBitmap(bitmap, lcdCallback(promise))
+      p.lcdApi()?.showBitmap(bitmap)
+      promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
@@ -485,9 +548,13 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   // region Transaction
 
   override fun enterPrinterBuffer(clean: Boolean, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.enterPrinterBuffer(clean)
+      isTransMode = true
+      p.lineApi()?.enableTransMode(true)
+      if (clean) {
+        p.lineApi()?.initLine(BaseStyle.getStyle())
+      }
       promise.resolve(null)
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
@@ -495,18 +562,38 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
   }
 
   override fun exitPrinterBuffer(commit: Boolean, promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.exitPrinterBufferWithCallback(commit, resultCallback(promise))
+      if (commit) {
+        p.lineApi()?.autoOut()
+        p.lineApi()?.printTrans(object : PrintResult() {
+          override fun onResult(resultCode: Int, message: String?) {
+            isTransMode = false
+            p.lineApi()?.enableTransMode(false)
+            if (resultCode == 0) promise.resolve(null)
+            else promise.reject("PRINTER_ERROR", message ?: "Print failed")
+          }
+        })
+      } else {
+        isTransMode = false
+        p.lineApi()?.enableTransMode(false)
+        promise.resolve(null)
+      }
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
   }
 
   override fun commitPrinterBuffer(promise: Promise) {
-    val service = getService(promise) ?: return
+    val p = getPrinter(promise) ?: return
     try {
-      service.commitPrinterBufferWithCallback(resultCallback(promise))
+      p.lineApi()?.autoOut()
+      p.lineApi()?.printTrans(object : PrintResult() {
+        override fun onResult(resultCode: Int, message: String?) {
+          if (resultCode == 0) promise.resolve(null)
+          else promise.reject("PRINTER_ERROR", message ?: "Print failed")
+        }
+      })
     } catch (e: Exception) {
       promise.reject("PRINTER_ERROR", e.message, e)
     }
@@ -516,8 +603,8 @@ class SunmiPrinterModule(reactContext: ReactApplicationContext) :
 
   override fun invalidate() {
     super.invalidate()
-    InnerPrinterManager.getInstance().unBindService(reactApplicationContext, printerCallback)
-    printerService = null
+    PrinterSdk.getInstance().destroy()
+    printer = null
   }
 
   companion object {
