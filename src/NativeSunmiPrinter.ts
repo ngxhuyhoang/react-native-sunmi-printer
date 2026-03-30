@@ -79,11 +79,7 @@ export interface Spec extends TurboModule {
 
   // LCD
   sendLCDCommand(flag: number): Promise<void>;
-  sendLCDFillString(
-    text: string,
-    size: number,
-    fill: boolean
-  ): Promise<void>;
+  sendLCDFillString(text: string, size: number, fill: boolean): Promise<void>;
   sendLCDMultiString(texts: string[], align: number[]): Promise<void>;
   sendLCDBitmap(base64: string): Promise<void>;
 

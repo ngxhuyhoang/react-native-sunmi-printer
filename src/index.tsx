@@ -89,10 +89,7 @@ export function printImage(base64: string): Promise<void> {
   return SunmiPrinter.printImage(base64);
 }
 
-export function printBitmapCustom(
-  base64: string,
-  type: number
-): Promise<void> {
+export function printBitmapCustom(base64: string, type: number): Promise<void> {
   return SunmiPrinter.printBitmapCustom(base64, type);
 }
 
@@ -104,7 +101,13 @@ export function printBarCode(
   width: number,
   textposition: number
 ): Promise<void> {
-  return SunmiPrinter.printBarCode(data, symbology, height, width, textposition);
+  return SunmiPrinter.printBarCode(
+    data,
+    symbology,
+    height,
+    width,
+    textposition
+  );
 }
 
 export function printQRCode(

@@ -135,39 +135,39 @@ const state = await updatePrinterState();
 <details>
 <summary><b>Printer Info</b></summary>
 
-| Method | Return | Description |
-|---|---|---|
-| `getPrinterSerialNo()` | `Promise<string>` | Printer serial number |
-| `getPrinterVersion()` | `Promise<string>` | Firmware version |
-| `getPrinterModal()` | `Promise<string>` | Device model |
-| `getPrinterPaper()` | `Promise<number>` | Paper size (1=58mm, other=80mm) |
-| `getPrinterMode()` | `Promise<number>` | Mode (0=normal, 1=black mark, 2=label) |
-| `getServiceVersion()` | `Promise<string>` | Print service version |
-| `getFirmwareStatus()` | `Promise<number>` | Firmware status |
-| `updatePrinterState()` | `Promise<number>` | Current printer state |
-| `getPrintedLength()` | `Promise<string>` | Print distance since boot |
-| `getPrinterFactory()` | `Promise<string>` | Printer head manufacturer |
+| Method                 | Return            | Description                            |
+| ---------------------- | ----------------- | -------------------------------------- |
+| `getPrinterSerialNo()` | `Promise<string>` | Printer serial number                  |
+| `getPrinterVersion()`  | `Promise<string>` | Firmware version                       |
+| `getPrinterModal()`    | `Promise<string>` | Device model                           |
+| `getPrinterPaper()`    | `Promise<number>` | Paper size (1=58mm, other=80mm)        |
+| `getPrinterMode()`     | `Promise<number>` | Mode (0=normal, 1=black mark, 2=label) |
+| `getServiceVersion()`  | `Promise<string>` | Print service version                  |
+| `getFirmwareStatus()`  | `Promise<number>` | Firmware status                        |
+| `updatePrinterState()` | `Promise<number>` | Current printer state                  |
+| `getPrintedLength()`   | `Promise<string>` | Print distance since boot              |
+| `getPrinterFactory()`  | `Promise<string>` | Printer head manufacturer              |
 
 </details>
 
 <details>
 <summary><b>Initialization</b></summary>
 
-| Method | Description |
-|---|---|
-| `printerInit()` | Reset all printer styles to default |
-| `printerSelfChecking()` | Print self-test page |
+| Method                  | Description                         |
+| ----------------------- | ----------------------------------- |
+| `printerInit()`         | Reset all printer styles to default |
+| `printerSelfChecking()` | Print self-test page                |
 
 </details>
 
 <details>
 <summary><b>Formatting</b></summary>
 
-| Method | Description |
-|---|---|
-| `setAlignment(alignment)` | Set alignment (0=left, 1=center, 2=right) |
-| `setFontName(typeface)` | Set font (`"gh"` for built-in monospace) |
-| `setFontSize(fontsize)` | Set font size |
+| Method                        | Description                               |
+| ----------------------------- | ----------------------------------------- |
+| `setAlignment(alignment)`     | Set alignment (0=left, 1=center, 2=right) |
+| `setFontName(typeface)`       | Set font (`"gh"` for built-in monospace)  |
+| `setFontSize(fontsize)`       | Set font size                             |
 | `setPrinterStyle(key, value)` | Set printer style (bold, underline, etc.) |
 
 </details>
@@ -175,20 +175,20 @@ const state = await updatePrinterState();
 <details>
 <summary><b>Text</b></summary>
 
-| Method | Description |
-|---|---|
-| `printText(text)` | Print text (include `\n` to flush) |
-| `printTextWithFont(text, typeface, fontsize)` | Print text with specific font and size |
-| `printOriginalText(text)` | Print text with variable-width characters |
+| Method                                        | Description                               |
+| --------------------------------------------- | ----------------------------------------- |
+| `printText(text)`                             | Print text (include `\n` to flush)        |
+| `printTextWithFont(text, typeface, fontsize)` | Print text with specific font and size    |
+| `printOriginalText(text)`                     | Print text with variable-width characters |
 
 </details>
 
 <details>
 <summary><b>Image</b></summary>
 
-| Method | Description |
-|---|---|
-| `printImage(base64)` | Print base64-encoded image |
+| Method                            | Description                                             |
+| --------------------------------- | ------------------------------------------------------- |
+| `printImage(base64)`              | Print base64-encoded image                              |
 | `printBitmapCustom(base64, type)` | Print with mode (0=default, 1=black&white, 2=grayscale) |
 
 > Max width: 384px (58mm) or 576px (80mm). Call `lineWrap()` after printing to feed paper.
@@ -198,19 +198,19 @@ const state = await updatePrinterState();
 <details>
 <summary><b>Barcode</b></summary>
 
-| Method | Description |
-|---|---|
+| Method                                                       | Description   |
+| ------------------------------------------------------------ | ------------- |
 | `printBarCode(data, symbology, height, width, textPosition)` | Print barcode |
-| `printQRCode(data, moduleSize, errorLevel)` | Print QR code |
+| `printQRCode(data, moduleSize, errorLevel)`                  | Print QR code |
 
 </details>
 
 <details>
 <summary><b>Table</b></summary>
 
-| Method | Description |
-|---|---|
-| `printColumnsText(texts, widths, aligns)` | Print columns (widths in character count) |
+| Method                                      | Description                                    |
+| ------------------------------------------- | ---------------------------------------------- |
+| `printColumnsText(texts, widths, aligns)`   | Print columns (widths in character count)      |
 | `printColumnsString(texts, widths, aligns)` | Print columns (widths as proportional weights) |
 
 </details>
@@ -218,20 +218,20 @@ const state = await updatePrinterState();
 <details>
 <summary><b>Raw / Paper</b></summary>
 
-| Method | Description |
-|---|---|
-| `sendRAWData(data)` | Send raw ESC/POS byte array |
-| `lineWrap(lines)` | Feed paper by N lines |
-| `cutPaper()` | Cut paper (if cutter available) |
-| `autoOutPaper()` | Auto feed paper to tear position |
+| Method              | Description                      |
+| ------------------- | -------------------------------- |
+| `sendRAWData(data)` | Send raw ESC/POS byte array      |
+| `lineWrap(lines)`   | Feed paper by N lines            |
+| `cutPaper()`        | Cut paper (if cutter available)  |
+| `autoOutPaper()`    | Auto feed paper to tear position |
 
 </details>
 
 <details>
 <summary><b>Cash Drawer</b></summary>
 
-| Method | Description |
-|---|---|
+| Method         | Description                     |
+| -------------- | ------------------------------- |
 | `openDrawer()` | Open cash drawer (if available) |
 
 </details>
@@ -239,9 +239,9 @@ const state = await updatePrinterState();
 <details>
 <summary><b>Label</b></summary>
 
-| Method | Description |
-|---|---|
-| `labelLocate()` | Locate label position |
+| Method          | Description                      |
+| --------------- | -------------------------------- |
+| `labelLocate()` | Locate label position            |
 | `labelOutput()` | Push label to cutter for peeling |
 
 </details>
@@ -249,23 +249,23 @@ const state = await updatePrinterState();
 <details>
 <summary><b>LCD Customer Display</b></summary>
 
-| Method | Description |
-|---|---|
-| `sendLCDCommand(flag)` | LCD command (1=init, 2=on, 3=off, 4=clear) |
-| `sendLCDFillString(text, size, fill)` | Display text on LCD |
-| `sendLCDMultiString(texts, align)` | Display multi-line text on LCD |
-| `sendLCDBitmap(base64)` | Display image on LCD |
+| Method                                | Description                                |
+| ------------------------------------- | ------------------------------------------ |
+| `sendLCDCommand(flag)`                | LCD command (1=init, 2=on, 3=off, 4=clear) |
+| `sendLCDFillString(text, size, fill)` | Display text on LCD                        |
+| `sendLCDMultiString(texts, align)`    | Display multi-line text on LCD             |
+| `sendLCDBitmap(base64)`               | Display image on LCD                       |
 
 </details>
 
 <details>
 <summary><b>Transaction</b></summary>
 
-| Method | Description |
-|---|---|
-| `enterPrinterBuffer(clean)` | Start buffering commands |
-| `exitPrinterBuffer(commit)` | Exit buffer (commit=true to print) |
-| `commitPrinterBuffer()` | Print buffer contents (stays in buffer mode) |
+| Method                      | Description                                  |
+| --------------------------- | -------------------------------------------- |
+| `enterPrinterBuffer(clean)` | Start buffering commands                     |
+| `exitPrinterBuffer(commit)` | Exit buffer (commit=true to print)           |
+| `commitPrinterBuffer()`     | Print buffer contents (stays in buffer mode) |
 
 </details>
 
@@ -273,11 +273,11 @@ const state = await updatePrinterState();
 
 ## Supported Devices
 
-| Device | Android | Status |
-|---|---|---|
-| Sunmi V2S | 11 | Supported |
-| Sunmi V2S Plus | 11 | Supported |
-| Newer Sunmi devices | 11+ | Supported |
+| Device              | Android | Status    |
+| ------------------- | ------- | --------- |
+| Sunmi V2S           | 11      | Supported |
+| Sunmi V2S Plus      | 11      | Supported |
+| Newer Sunmi devices | 11+     | Supported |
 
 ---
 
