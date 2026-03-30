@@ -1,7 +1,7 @@
-# @ngxhuyhoang/react-native-sunmi-printer
+# @hoangnh0099/react-native-sunmi-printer
 
-[![npm version](https://img.shields.io/badge/npm-v0.1.0-CB3837.svg?style=flat&logo=npm)](https://www.npmjs.com/package/@ngxhuyhoang/@ngxhuyhoang/react-native-sunmi-printer)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/ngxhuyhoang/@ngxhuyhoang/react-native-sunmi-printer/blob/main/LICENSE)
+[![npm version](https://img.shields.io/badge/npm-v0.1.0-CB3837.svg?style=flat&logo=npm)](https://www.npmjs.com/package/@hoangnh0099/react-native-sunmi-printer)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/ngxhuyhoang/react-native-sunmi-printer/blob/main/LICENSE)
 [![platform](https://img.shields.io/badge/platform-Android-3DDC84.svg?style=flat&logo=android&logoColor=white)](#supported-devices)
 [![react-native](https://img.shields.io/badge/React%20Native-New%20Architecture-61DAFB.svg?style=flat&logo=react&logoColor=white)](#)
 
@@ -14,9 +14,9 @@ Built with **React Native New Architecture** (TurboModule).
 ## Installation
 
 ```sh
-npm install @ngxhuyhoang/react-native-sunmi-printer
+npm install @hoangnh0099/react-native-sunmi-printer
 # or
-yarn add @ngxhuyhoang/react-native-sunmi-printer
+yarn add @hoangnh0099/react-native-sunmi-printer
 ```
 
 > **Note:** This library only supports Android. Sunmi devices are Android-based hardware.
@@ -28,7 +28,7 @@ yarn add @ngxhuyhoang/react-native-sunmi-printer
 ### Print Text
 
 ```js
-import { printText, lineWrap } from '@ngxhuyhoang/react-native-sunmi-printer';
+import { printText, lineWrap } from '@hoangnh0099/react-native-sunmi-printer';
 
 await printText('Hello, Sunmi!\n');
 await lineWrap(3);
@@ -37,7 +37,7 @@ await lineWrap(3);
 ### Print Image (Base64)
 
 ```js
-import { printImage, lineWrap } from '@ngxhuyhoang/react-native-sunmi-printer';
+import { printImage, lineWrap } from '@hoangnh0099/react-native-sunmi-printer';
 
 await printImage(base64String);
 await lineWrap(3);
@@ -46,7 +46,7 @@ await lineWrap(3);
 ### Print QR Code
 
 ```js
-import { printQRCode, lineWrap } from '@ngxhuyhoang/react-native-sunmi-printer';
+import { printQRCode, lineWrap } from '@hoangnh0099/react-native-sunmi-printer';
 
 // printQRCode(data, moduleSize, errorLevel)
 // moduleSize: 1-16
@@ -61,7 +61,7 @@ await lineWrap(3);
 import {
   printBarCode,
   lineWrap,
-} from '@ngxhuyhoang/react-native-sunmi-printer';
+} from '@hoangnh0099/react-native-sunmi-printer';
 
 // printBarCode(data, symbology, height, width, textPosition)
 // symbology: 0=UPC-A, 1=UPC-E, 2=EAN13, 3=EAN8, 4=CODE39,
@@ -78,7 +78,7 @@ await lineWrap(3);
 import {
   printColumnsString,
   lineWrap,
-} from '@ngxhuyhoang/react-native-sunmi-printer';
+} from '@hoangnh0099/react-native-sunmi-printer';
 
 // printColumnsString(texts, widths, aligns)
 // widths: proportional weights (e.g., [1, 1] = equal columns)
@@ -96,7 +96,7 @@ import {
   setFontSize,
   printText,
   printerInit,
-} from '@ngxhuyhoang/react-native-sunmi-printer';
+} from '@hoangnh0099/react-native-sunmi-printer';
 
 await setAlignment(1); // 0=left, 1=center, 2=right
 await setFontSize(28);
@@ -116,7 +116,7 @@ import {
   printText,
   lineWrap,
   exitPrinterBuffer,
-} from '@ngxhuyhoang/react-native-sunmi-printer';
+} from '@hoangnh0099/react-native-sunmi-printer';
 
 await enterPrinterBuffer(true);
 await printText('Buffered print\n');
@@ -127,7 +127,7 @@ await exitPrinterBuffer(true); // resolves when printing completes
 ### Printer Status
 
 ```js
-import { updatePrinterState } from '@ngxhuyhoang/react-native-sunmi-printer';
+import { updatePrinterState } from '@hoangnh0099/react-native-sunmi-printer';
 
 const state = await updatePrinterState();
 // 1=normal, 2=initializing, 3=hardware error, 4=out of paper,

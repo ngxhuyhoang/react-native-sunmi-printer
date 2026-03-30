@@ -59,7 +59,7 @@ import {
   enterPrinterBuffer,
   exitPrinterBuffer,
   commitPrinterBuffer,
-} from '@ngxhuyhoang/react-native-sunmi-printer';
+} from '@hoangnh0099/react-native-sunmi-printer';
 import { useState } from 'react';
 
 const SAMPLE_BASE64 =

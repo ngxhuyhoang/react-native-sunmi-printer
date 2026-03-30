@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "@ngxhuyhoang/react-native-sunmi-printer": ["./src/index"]
+      "@hoangnh0099/react-native-sunmi-printer": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

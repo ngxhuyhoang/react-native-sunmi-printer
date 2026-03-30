@@ -1,5 +1,5 @@
 {
-  "name": "@ngxhuyhoang/react-native-sunmi-printer",
+  "name": "@hoangnh0099/react-native-sunmi-printer",
   "version": "0.1.0",
   "description": "The new sunmi printer library",
   "main": "./lib/module/index.js",
