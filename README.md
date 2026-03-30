@@ -1,9 +1,9 @@
 # react-native-sunmi-printer
 
-[![npm version](https://img.shields.io/badge/npm-v0.1.0-CB3837.svg?logo=npm)](https://www.npmjs.com/package/react-native-sunmi-printer)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ngxhuyhoang/react-native-sunmi-printer/blob/main/LICENSE)
-[![platform](https://img.shields.io/badge/platform-Android-3DDC84.svg?logo=android&logoColor=white)](#supported-devices)
-[![react-native](https://img.shields.io/badge/React%20Native-New%20Architecture-61DAFB.svg?logo=react&logoColor=white)](#)
+[![npm version](https://img.shields.io/badge/npm-v0.1.0-CB3837.svg?style=flat&logo=npm)](https://www.npmjs.com/package/react-native-sunmi-printer)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/ngxhuyhoang/react-native-sunmi-printer/blob/main/LICENSE)
+[![platform](https://img.shields.io/badge/platform-Android-3DDC84.svg?style=flat&logo=android&logoColor=white)](#supported-devices)
+[![react-native](https://img.shields.io/badge/React%20Native-New%20Architecture-61DAFB.svg?style=flat&logo=react&logoColor=white)](#)
 
 React Native library for Sunmi built-in printers. Supports Sunmi V2S and newer devices (Android 11+).
 
