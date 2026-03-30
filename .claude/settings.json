@@ -1,0 +1,7 @@
+{
+  "model": "opus",
+  "effortLevel": "high",
+  "permissions": {
+    "allow": ["Bash(yarn install:*)"]
+  }
+}
