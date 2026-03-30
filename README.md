@@ -1,8 +1,15 @@
 # react-native-sunmi-printer
 
+[![npm version](https://img.shields.io/npm/v/react-native-sunmi-printer.svg)](https://www.npmjs.com/package/react-native-sunmi-printer)
+[![license](https://img.shields.io/npm/l/react-native-sunmi-printer.svg)](https://github.com/ngxhuyhoang/react-native-sunmi-printer/blob/main/LICENSE)
+[![platform](https://img.shields.io/badge/platform-Android-3DDC84.svg?logo=android&logoColor=white)](#supported-devices)
+[![react-native](https://img.shields.io/badge/React%20Native-New%20Architecture-61DAFB.svg?logo=react&logoColor=white)](#)
+
 React Native library for Sunmi built-in printers. Supports Sunmi V2S and newer devices (Android 11+).
 
-Built with React Native New Architecture (TurboModule).
+Built with **React Native New Architecture** (TurboModule).
+
+---
 
 ## Installation
 
@@ -13,6 +20,8 @@ yarn add react-native-sunmi-printer
 ```
 
 > **Note:** This library only supports Android. Sunmi devices are Android-based hardware.
+
+---
 
 ## Usage
 
@@ -52,9 +61,9 @@ await lineWrap(3);
 import { printBarCode, lineWrap } from 'react-native-sunmi-printer';
 
 // printBarCode(data, symbology, height, width, textPosition)
-// symbology: 0=UPC-A, 1=UPC-E, 2=EAN13, 3=EAN8, 4=CODE39, 5=ITF, 6=CODABAR, 7=CODE93, 8=CODE128
-// height: 1-255
-// width: 2-6
+// symbology: 0=UPC-A, 1=UPC-E, 2=EAN13, 3=EAN8, 4=CODE39,
+//            5=ITF, 6=CODABAR, 7=CODE93, 8=CODE128
+// height: 1-255 | width: 2-6
 // textPosition: 0=none, 1=above, 2=below, 3=both
 await printBarCode('1234567890', 8, 162, 2, 2);
 await lineWrap(3);
@@ -79,7 +88,6 @@ await lineWrap(3);
 import {
   setAlignment,
   setFontSize,
-  setPrinterStyle,
   printText,
   printerInit,
 } from 'react-native-sunmi-printer';
@@ -120,9 +128,12 @@ const state = await updatePrinterState();
 // 5=overheating, 6=cover open, 7=cutter error, 505=no printer
 ```
 
+---
+
 ## API Reference
 
-### Printer Info
+<details>
+<summary><b>Printer Info</b></summary>
 
 | Method | Return | Description |
 |---|---|---|
@@ -137,14 +148,20 @@ const state = await updatePrinterState();
 | `getPrintedLength()` | `Promise<string>` | Print distance since boot |
 | `getPrinterFactory()` | `Promise<string>` | Printer head manufacturer |
 
-### Initialization
+</details>
+
+<details>
+<summary><b>Initialization</b></summary>
 
 | Method | Description |
 |---|---|
 | `printerInit()` | Reset all printer styles to default |
 | `printerSelfChecking()` | Print self-test page |
 
-### Formatting
+</details>
+
+<details>
+<summary><b>Formatting</b></summary>
 
 | Method | Description |
 |---|---|
@@ -153,7 +170,10 @@ const state = await updatePrinterState();
 | `setFontSize(fontsize)` | Set font size |
 | `setPrinterStyle(key, value)` | Set printer style (bold, underline, etc.) |
 
-### Text
+</details>
+
+<details>
+<summary><b>Text</b></summary>
 
 | Method | Description |
 |---|---|
@@ -161,7 +181,10 @@ const state = await updatePrinterState();
 | `printTextWithFont(text, typeface, fontsize)` | Print text with specific font and size |
 | `printOriginalText(text)` | Print text with variable-width characters |
 
-### Image
+</details>
+
+<details>
+<summary><b>Image</b></summary>
 
 | Method | Description |
 |---|---|
@@ -170,21 +193,30 @@ const state = await updatePrinterState();
 
 > Max width: 384px (58mm) or 576px (80mm). Call `lineWrap()` after printing to feed paper.
 
-### Barcode
+</details>
+
+<details>
+<summary><b>Barcode</b></summary>
 
 | Method | Description |
 |---|---|
 | `printBarCode(data, symbology, height, width, textPosition)` | Print barcode |
 | `printQRCode(data, moduleSize, errorLevel)` | Print QR code |
 
-### Table
+</details>
+
+<details>
+<summary><b>Table</b></summary>
 
 | Method | Description |
 |---|---|
 | `printColumnsText(texts, widths, aligns)` | Print columns (widths in character count) |
 | `printColumnsString(texts, widths, aligns)` | Print columns (widths as proportional weights) |
 
-### Raw / Paper
+</details>
+
+<details>
+<summary><b>Raw / Paper</b></summary>
 
 | Method | Description |
 |---|---|
@@ -193,20 +225,29 @@ const state = await updatePrinterState();
 | `cutPaper()` | Cut paper (if cutter available) |
 | `autoOutPaper()` | Auto feed paper to tear position |
 
-### Cash Drawer
+</details>
+
+<details>
+<summary><b>Cash Drawer</b></summary>
 
 | Method | Description |
 |---|---|
 | `openDrawer()` | Open cash drawer (if available) |
 
-### Label
+</details>
+
+<details>
+<summary><b>Label</b></summary>
 
 | Method | Description |
 |---|---|
 | `labelLocate()` | Locate label position |
 | `labelOutput()` | Push label to cutter for peeling |
 
-### LCD Customer Display
+</details>
+
+<details>
+<summary><b>LCD Customer Display</b></summary>
 
 | Method | Description |
 |---|---|
@@ -215,7 +256,10 @@ const state = await updatePrinterState();
 | `sendLCDMultiString(texts, align)` | Display multi-line text on LCD |
 | `sendLCDBitmap(base64)` | Display image on LCD |
 
-### Transaction
+</details>
+
+<details>
+<summary><b>Transaction</b></summary>
 
 | Method | Description |
 |---|---|
@@ -223,18 +267,28 @@ const state = await updatePrinterState();
 | `exitPrinterBuffer(commit)` | Exit buffer (commit=true to print) |
 | `commitPrinterBuffer()` | Print buffer contents (stays in buffer mode) |
 
+</details>
+
+---
+
 ## Supported Devices
 
-- Sunmi V2S
-- Sunmi V2S Plus
-- And newer Sunmi devices with Android 11+
+| Device | Android | Status |
+|---|---|---|
+| Sunmi V2S | 11 | Supported |
+| Sunmi V2S Plus | 11 | Supported |
+| Newer Sunmi devices | 11+ | Supported |
+
+---
 
 ## Contributing
 
-- [Development workflow](CONTRIBUTING.md#development-workflow)
-- [Sending a pull request](CONTRIBUTING.md#sending-a-pull-request)
-- [Code of conduct](CODE_OF_CONDUCT.md)
+See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
 
 ## License
 
-MIT
+[MIT](LICENSE)
+
+---
+
+Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
