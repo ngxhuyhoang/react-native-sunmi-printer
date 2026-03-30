@@ -327,21 +327,9 @@ export default function App() {
   const handlePrintColumnsString = async () => {
     try {
       // widths as proportional weights
-      await printColumnsString(
-        ['Name', 'Qty', 'Price'],
-        [2, 1, 1],
-        [0, 1, 2]
-      );
-      await printColumnsString(
-        ['Coffee', '2', '$6.00'],
-        [2, 1, 1],
-        [0, 1, 2]
-      );
-      await printColumnsString(
-        ['Donut', '3', '$4.50'],
-        [2, 1, 1],
-        [0, 1, 2]
-      );
+      await printColumnsString(['Name', 'Qty', 'Price'], [2, 1, 1], [0, 1, 2]);
+      await printColumnsString(['Coffee', '2', '$6.00'], [2, 1, 1], [0, 1, 2]);
+      await printColumnsString(['Donut', '3', '$4.50'], [2, 1, 1], [0, 1, 2]);
       await lineWrap(3);
       showResult('printColumnsString', 'OK');
     } catch (e) {
@@ -356,7 +344,9 @@ export default function App() {
   const handleSendRAWData = async () => {
     try {
       // ESC/POS: bold on, print "RAW", bold off, newline
-      await sendRAWData([0x1b, 0x45, 0x01, 0x52, 0x41, 0x57, 0x1b, 0x45, 0x00, 0x0a]);
+      await sendRAWData([
+        0x1b, 0x45, 0x01, 0x52, 0x41, 0x57, 0x1b, 0x45, 0x00, 0x0a,
+      ]);
       await lineWrap(3);
       showResult('sendRAWData', 'OK');
     } catch (e) {
@@ -527,16 +517,28 @@ export default function App() {
 
       <Section title="Text">
         <Button title="Print Text" onPress={handlePrintText} />
-        <Button title="Print Text With Font" onPress={handlePrintTextWithFont} />
+        <Button
+          title="Print Text With Font"
+          onPress={handlePrintTextWithFont}
+        />
         <Button title="Print Original Text" onPress={handlePrintOriginalText} />
-        <Button title="Print Formatted Receipt" onPress={handlePrintFormatted} />
+        <Button
+          title="Print Formatted Receipt"
+          onPress={handlePrintFormatted}
+        />
         <Button title="Set Font (Monospace)" onPress={handleSetFont} />
-        <Button title="Set Printer Style (Bold)" onPress={handleSetPrinterStyle} />
+        <Button
+          title="Set Printer Style (Bold)"
+          onPress={handleSetPrinterStyle}
+        />
       </Section>
 
       <Section title="Image">
         <Button title="Print Image" onPress={handlePrintImage} />
-        <Button title="Print Bitmap Custom (Grayscale)" onPress={handlePrintBitmapCustom} />
+        <Button
+          title="Print Bitmap Custom (Grayscale)"
+          onPress={handlePrintBitmapCustom}
+        />
       </Section>
 
       <Section title="Barcode">
@@ -546,7 +548,10 @@ export default function App() {
 
       <Section title="Table">
         <Button title="Print Columns Text" onPress={handlePrintColumnsText} />
-        <Button title="Print Columns String" onPress={handlePrintColumnsString} />
+        <Button
+          title="Print Columns String"
+          onPress={handlePrintColumnsString}
+        />
       </Section>
 
       <Section title="Raw / Paper">
