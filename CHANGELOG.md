@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.4.0](https://github.com/ngxhuyhoang/react-native-sunmi-printer/compare/v0.3.0...v0.4.0) (2026-03-31)
+
+
+### Features
+
+* add some function ([6858a65](https://github.com/ngxhuyhoang/react-native-sunmi-printer/commit/6858a6503aab362645939b84b1b90a768b260eff))
+
 # [0.3.0](https://github.com/ngxhuyhoang/react-native-sunmi-printer/compare/v0.2.0...v0.3.0) (2026-03-30)
 
 
