@@ -67,6 +67,35 @@ export function setPrinterStyle(key: number, value: number): Promise<void> {
   return SunmiPrinter.setPrinterStyle(key, value);
 }
 
+// Print Style Query
+export function getForcedDouble(): Promise<number> {
+  return SunmiPrinter.getForcedDouble();
+}
+
+export function isForcedBold(): Promise<boolean> {
+  return SunmiPrinter.isForcedBold();
+}
+
+export function isForcedUnderline(): Promise<boolean> {
+  return SunmiPrinter.isForcedUnderline();
+}
+
+export function isForcedAntiWhite(): Promise<boolean> {
+  return SunmiPrinter.isForcedAntiWhite();
+}
+
+export function getPrinterDensity(): Promise<number> {
+  return SunmiPrinter.getPrinterDensity();
+}
+
+export function getForcedRowHeight(): Promise<number> {
+  return SunmiPrinter.getForcedRowHeight();
+}
+
+export function getCurrentFontName(): Promise<string> {
+  return SunmiPrinter.getCurrentFontName();
+}
+
 // Text
 export function printText(text: string): Promise<void> {
   return SunmiPrinter.printText(text);
@@ -118,6 +147,15 @@ export function printQRCode(
   return SunmiPrinter.printQRCode(data, modulesize, errorlevel);
 }
 
+export function print2DCode(
+  data: string,
+  symbology: number,
+  modulesize: number,
+  errorlevel: number
+): Promise<void> {
+  return SunmiPrinter.print2DCode(data, symbology, modulesize, errorlevel);
+}
+
 // Table
 export function printColumnsText(
   texts: string[],
@@ -149,6 +187,14 @@ export function cutPaper(): Promise<void> {
   return SunmiPrinter.cutPaper();
 }
 
+export function getCutPaperTimes(): Promise<number> {
+  return SunmiPrinter.getCutPaperTimes();
+}
+
+export function getPrinterBBMDistance(): Promise<number> {
+  return SunmiPrinter.getPrinterBBMDistance();
+}
+
 export function autoOutPaper(): Promise<void> {
   return SunmiPrinter.autoOutPaper();
 }
@@ -156,6 +202,14 @@ export function autoOutPaper(): Promise<void> {
 // Cash Drawer
 export function openDrawer(): Promise<void> {
   return SunmiPrinter.openDrawer();
+}
+
+export function getDrawerStatus(): Promise<number> {
+  return SunmiPrinter.getDrawerStatus();
+}
+
+export function getOpenDrawerTimes(): Promise<number> {
+  return SunmiPrinter.getOpenDrawerTimes();
 }
 
 // Label
@@ -170,6 +224,17 @@ export function labelOutput(): Promise<void> {
 // LCD
 export function sendLCDCommand(flag: number): Promise<void> {
   return SunmiPrinter.sendLCDCommand(flag);
+}
+
+export function sendLCDString(text: string): Promise<void> {
+  return SunmiPrinter.sendLCDString(text);
+}
+
+export function sendLCDDoubleString(
+  topText: string,
+  bottomText: string
+): Promise<void> {
+  return SunmiPrinter.sendLCDDoubleString(topText, bottomText);
 }
 
 export function sendLCDFillString(
@@ -202,4 +267,12 @@ export function exitPrinterBuffer(commit: boolean): Promise<void> {
 
 export function commitPrinterBuffer(): Promise<void> {
   return SunmiPrinter.commitPrinterBuffer();
+}
+
+export function exitPrinterBufferWithCallback(commit: boolean): Promise<void> {
+  return SunmiPrinter.exitPrinterBufferWithCallback(commit);
+}
+
+export function commitPrinterBufferWithCallback(): Promise<void> {
+  return SunmiPrinter.commitPrinterBufferWithCallback();
 }

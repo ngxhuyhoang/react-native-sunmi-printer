@@ -23,6 +23,15 @@ export interface Spec extends TurboModule {
   setFontSize(fontsize: number): Promise<void>;
   setPrinterStyle(key: number, value: number): Promise<void>;
 
+  // Print Style Query
+  getForcedDouble(): Promise<number>;
+  isForcedBold(): Promise<boolean>;
+  isForcedUnderline(): Promise<boolean>;
+  isForcedAntiWhite(): Promise<boolean>;
+  getPrinterDensity(): Promise<number>;
+  getForcedRowHeight(): Promise<number>;
+  getCurrentFontName(): Promise<string>;
+
   // Text
   printText(text: string): Promise<void>;
   printTextWithFont(
@@ -49,6 +58,12 @@ export interface Spec extends TurboModule {
     modulesize: number,
     errorlevel: number
   ): Promise<void>;
+  print2DCode(
+    data: string,
+    symbology: number,
+    modulesize: number,
+    errorlevel: number
+  ): Promise<void>;
 
   // Table
   printColumnsText(
@@ -70,8 +85,14 @@ export interface Spec extends TurboModule {
   cutPaper(): Promise<void>;
   autoOutPaper(): Promise<void>;
 
+  // Paper Info
+  getCutPaperTimes(): Promise<number>;
+  getPrinterBBMDistance(): Promise<number>;
+
   // Cash Drawer
   openDrawer(): Promise<void>;
+  getDrawerStatus(): Promise<number>;
+  getOpenDrawerTimes(): Promise<number>;
 
   // Label
   labelLocate(): Promise<void>;
@@ -79,6 +100,8 @@ export interface Spec extends TurboModule {
 
   // LCD
   sendLCDCommand(flag: number): Promise<void>;
+  sendLCDString(text: string): Promise<void>;
+  sendLCDDoubleString(topText: string, bottomText: string): Promise<void>;
   sendLCDFillString(text: string, size: number, fill: boolean): Promise<void>;
   sendLCDMultiString(texts: string[], align: number[]): Promise<void>;
   sendLCDBitmap(base64: string): Promise<void>;
@@ -87,6 +110,8 @@ export interface Spec extends TurboModule {
   enterPrinterBuffer(clean: boolean): Promise<void>;
   exitPrinterBuffer(commit: boolean): Promise<void>;
   commitPrinterBuffer(): Promise<void>;
+  exitPrinterBufferWithCallback(commit: boolean): Promise<void>;
+  commitPrinterBufferWithCallback(): Promise<void>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('SunmiPrinter');

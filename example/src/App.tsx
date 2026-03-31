@@ -33,9 +33,18 @@ import {
   // Image
   printImage,
   printBitmapCustom,
+  // Print Style Query
+  getForcedDouble,
+  isForcedBold,
+  isForcedUnderline,
+  isForcedAntiWhite,
+  getForcedRowHeight,
+  getCurrentFontName,
+  getPrinterDensity,
   // Barcode
   printBarCode,
   printQRCode,
+  print2DCode,
   // Table
   printColumnsText,
   printColumnsString,
@@ -45,13 +54,19 @@ import {
   lineWrap,
   cutPaper,
   autoOutPaper,
+  getCutPaperTimes,
+  getPrinterBBMDistance,
   // Cash Drawer
   openDrawer,
+  getDrawerStatus,
+  getOpenDrawerTimes,
   // Label
   labelLocate,
   labelOutput,
   // LCD
   sendLCDCommand,
+  sendLCDString,
+  sendLCDDoubleString,
   sendLCDFillString,
   sendLCDMultiString,
   sendLCDBitmap,
@@ -59,6 +74,8 @@ import {
   enterPrinterBuffer,
   exitPrinterBuffer,
   commitPrinterBuffer,
+  exitPrinterBufferWithCallback,
+  commitPrinterBufferWithCallback,
 } from '@hoangnh0099/react-native-sunmi-printer';
 import { useState } from 'react';
 
@@ -252,6 +269,31 @@ export default function App() {
     }
   };
 
+  const handleGetStyleInfo = async () => {
+    try {
+      const bold = await isForcedBold();
+      const underline = await isForcedUnderline();
+      const antiWhite = await isForcedAntiWhite();
+      const double = await getForcedDouble();
+      const rowHeight = await getForcedRowHeight();
+      const fontName = await getCurrentFontName();
+      const density = await getPrinterDensity();
+      setInfo(
+        [
+          `Bold: ${bold}`,
+          `Underline: ${underline}`,
+          `AntiWhite: ${antiWhite}`,
+          `Double: ${double}`,
+          `Row Height: ${rowHeight}`,
+          `Font: ${fontName || '(default)'}`,
+          `Density: ${density}`,
+        ].join('\n')
+      );
+    } catch (e) {
+      showError(e);
+    }
+  };
+
   // endregion
 
   // region Image
@@ -302,6 +344,19 @@ export default function App() {
       await printerInit();
       await lineWrap(3);
       showResult('printQRCode', 'OK');
+    } catch (e) {
+      showError(e);
+    }
+  };
+
+  const handlePrint2DCode = async () => {
+    try {
+      await setAlignment(1);
+      // PDF417: symbology=2, moduleSize=2, errorLevel=2
+      await print2DCode('Hello PDF417', 2, 2, 2);
+      await printerInit();
+      await lineWrap(3);
+      showResult('print2DCode (PDF417)', 'OK');
     } catch (e) {
       showError(e);
     }
@@ -382,6 +437,24 @@ export default function App() {
     }
   };
 
+  const handleGetCutPaperTimes = async () => {
+    try {
+      const times = await getCutPaperTimes();
+      showResult('Cut Paper Times', times);
+    } catch (e) {
+      showError(e);
+    }
+  };
+
+  const handleGetBBMDistance = async () => {
+    try {
+      const distance = await getPrinterBBMDistance();
+      showResult('BBM Distance', distance);
+    } catch (e) {
+      showError(e);
+    }
+  };
+
   // endregion
 
   // region Cash Drawer
@@ -390,6 +463,24 @@ export default function App() {
     try {
       await openDrawer();
       showResult('openDrawer', 'OK');
+    } catch (e) {
+      showError(e);
+    }
+  };
+
+  const handleGetDrawerStatus = async () => {
+    try {
+      const status = await getDrawerStatus();
+      showResult('Drawer Status', status === 1 ? 'Open' : 'Closed');
+    } catch (e) {
+      showError(e);
+    }
+  };
+
+  const handleGetOpenDrawerTimes = async () => {
+    try {
+      const times = await getOpenDrawerTimes();
+      showResult('Open Drawer Times', times);
     } catch (e) {
       showError(e);
     }
@@ -425,6 +516,24 @@ export default function App() {
     try {
       await sendLCDCommand(1); // init
       showResult('sendLCDCommand (init)', 'OK');
+    } catch (e) {
+      showError(e);
+    }
+  };
+
+  const handleLCDString = async () => {
+    try {
+      await sendLCDString('Hello LCD!');
+      showResult('sendLCDString', 'OK');
+    } catch (e) {
+      showError(e);
+    }
+  };
+
+  const handleLCDDoubleString = async () => {
+    try {
+      await sendLCDDoubleString('Top Line', 'Bottom Line');
+      showResult('sendLCDDoubleString', 'OK');
     } catch (e) {
       showError(e);
     }
@@ -497,6 +606,30 @@ export default function App() {
     }
   };
 
+  const handleCommitBufferWithCallback = async () => {
+    try {
+      await enterPrinterBuffer(true);
+      await printText('Commit with callback\n');
+      await lineWrap(3);
+      await commitPrinterBufferWithCallback();
+      showResult('commitPrinterBufferWithCallback', 'OK');
+    } catch (e) {
+      showError(e);
+    }
+  };
+
+  const handleExitBufferWithCallback = async () => {
+    try {
+      await enterPrinterBuffer(true);
+      await printText('Exit with callback\n');
+      await lineWrap(3);
+      await exitPrinterBufferWithCallback(true);
+      showResult('exitPrinterBufferWithCallback', 'OK');
+    } catch (e) {
+      showError(e);
+    }
+  };
+
   // endregion
 
   return (
@@ -531,6 +664,7 @@ export default function App() {
           title="Set Printer Style (Bold)"
           onPress={handleSetPrinterStyle}
         />
+        <Button title="Get Style Info" onPress={handleGetStyleInfo} />
       </Section>
 
       <Section title="Image">
@@ -544,6 +678,7 @@ export default function App() {
       <Section title="Barcode">
         <Button title="Print Barcode (CODE128)" onPress={handlePrintBarCode} />
         <Button title="Print QR Code" onPress={handlePrintQRCode} />
+        <Button title="Print 2D Code (PDF417)" onPress={handlePrint2DCode} />
       </Section>
 
       <Section title="Table">
@@ -559,10 +694,17 @@ export default function App() {
         <Button title="Line Wrap (5)" onPress={handleLineWrap} />
         <Button title="Cut Paper" onPress={handleCutPaper} />
         <Button title="Auto Out Paper" onPress={handleAutoOutPaper} />
+        <Button title="Get Cut Paper Times" onPress={handleGetCutPaperTimes} />
+        <Button title="Get BBM Distance" onPress={handleGetBBMDistance} />
       </Section>
 
       <Section title="Cash Drawer">
         <Button title="Open Drawer" onPress={handleOpenDrawer} />
+        <Button title="Get Drawer Status" onPress={handleGetDrawerStatus} />
+        <Button
+          title="Get Open Drawer Times"
+          onPress={handleGetOpenDrawerTimes}
+        />
       </Section>
 
       <Section title="Label">
@@ -572,7 +714,9 @@ export default function App() {
 
       <Section title="LCD Display">
         <Button title="LCD Init" onPress={handleLCDInit} />
-        <Button title="LCD Text" onPress={handleLCDText} />
+        <Button title="LCD String" onPress={handleLCDString} />
+        <Button title="LCD Double String" onPress={handleLCDDoubleString} />
+        <Button title="LCD Fill String" onPress={handleLCDText} />
         <Button title="LCD Multi String" onPress={handleLCDMultiString} />
         <Button title="LCD Bitmap" onPress={handleLCDBitmap} />
         <Button title="LCD Clear" onPress={handleLCDClear} />
@@ -581,6 +725,14 @@ export default function App() {
       <Section title="Transaction">
         <Button title="Transaction Print" onPress={handleTransactionPrint} />
         <Button title="Commit Buffer" onPress={handleCommitBuffer} />
+        <Button
+          title="Commit Buffer (Callback)"
+          onPress={handleCommitBufferWithCallback}
+        />
+        <Button
+          title="Exit Buffer (Callback)"
+          onPress={handleExitBufferWithCallback}
+        />
       </Section>
     </ScrollView>
   );

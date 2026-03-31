@@ -43,15 +43,47 @@ await printImage(base64String);
 await lineWrap(3);
 ```
 
+### Print with Styles (Bold, Italic, Underline)
+
+```js
+import {
+  setPrinterStyle,
+  printText,
+  lineWrap,
+  printerInit,
+} from '@hoangnh0099/react-native-sunmi-printer';
+
+// setPrinterStyle(key, value)
+// Keys: 0=Bold, 1=Underline, 2=AntiWhite, 3=Strikethrough,
+//       4=Italic, 5=Invert, 14=DoubleWidth, 15=DoubleHeight
+// Value: 1=Enable, 0=Disable
+await setPrinterStyle(0, 1); // Bold ON
+await setPrinterStyle(1, 1); // Underline ON
+await printText('Bold & Underlined\n');
+await printerInit(); // Reset all styles
+await lineWrap(3);
+```
+
 ### Print QR Code
 
 ```js
 import { printQRCode, lineWrap } from '@hoangnh0099/react-native-sunmi-printer';
 
 // printQRCode(data, moduleSize, errorLevel)
-// moduleSize: 1-16
+// moduleSize: 4-16
 // errorLevel: 0=L(7%), 1=M(15%), 2=Q(25%), 3=H(30%)
 await printQRCode('https://example.com', 8, 2);
+await lineWrap(3);
+```
+
+### Print 2D Barcode (PDF417 / DataMatrix)
+
+```js
+import { print2DCode, lineWrap } from '@hoangnh0099/react-native-sunmi-printer';
+
+// print2DCode(data, symbology, moduleSize, errorLevel)
+// symbology: 1=QR, 2=PDF417, 3=DataMatrix
+await print2DCode('Hello PDF417', 2, 2, 2);
 await lineWrap(3);
 ```
 
@@ -172,9 +204,39 @@ const state = await updatePrinterState();
 | Method                        | Description                               |
 | ----------------------------- | ----------------------------------------- |
 | `setAlignment(alignment)`     | Set alignment (0=left, 1=center, 2=right) |
-| `setFontName(typeface)`       | ~~Not supported in PrinterX SDK~~         |
+| `setFontName(typeface)`       | Set custom vector font name               |
 | `setFontSize(fontsize)`       | Set font size                             |
-| `setPrinterStyle(key, value)` | ~~Not supported in PrinterX SDK~~         |
+| `setPrinterStyle(key, value)` | Set print style (see table below)         |
+
+**`setPrinterStyle` Keys:**
+
+| Key | Constant             | Values            |
+| --- | -------------------- | ----------------- |
+| 0   | `ENABLE_BOLD`        | 0=off, 1=on       |
+| 1   | `ENABLE_UNDERLINE`   | 0=off, 1=on       |
+| 2   | `ENABLE_ANTI_WHITE`  | 0=off, 1=on       |
+| 3   | `ENABLE_STRIKETHROUGH` | 0=off, 1=on     |
+| 4   | `ENABLE_ITALIC`      | 0=off, 1=on       |
+| 5   | `ENABLE_INVERT`      | 0=off, 1=on       |
+| 6   | `SET_TEXT_RIGHT_SPACING` | pixels         |
+| 9   | `SET_LINE_SPACING`   | pixels             |
+| 14  | `ENABLE_DOUBLE_WIDTH` | 0=off, 1=on      |
+| 15  | `ENABLE_DOUBLE_HEIGHT` | 0=off, 1=on     |
+
+</details>
+
+<details>
+<summary><b>Print Style Query</b></summary>
+
+| Method                | Return              | Description                                       |
+| --------------------- | ------------------- | ------------------------------------------------- |
+| `getForcedDouble()`   | `Promise<number>`   | 0=none, 1=width, 2=height, 3=both                |
+| `isForcedBold()`      | `Promise<boolean>`  | Whether bold is currently enabled                 |
+| `isForcedUnderline()` | `Promise<boolean>`  | Whether underline is currently enabled            |
+| `isForcedAntiWhite()` | `Promise<boolean>`  | Whether anti-white is currently enabled           |
+| `getForcedRowHeight()` | `Promise<number>`  | Current line spacing (-1=default)                 |
+| `getCurrentFontName()` | `Promise<string>`  | Current font name (empty=default)                 |
+| `getPrinterDensity()` | `Promise<number>`   | Print density level                               |
 
 </details>
 
@@ -204,10 +266,11 @@ const state = await updatePrinterState();
 <details>
 <summary><b>Barcode</b></summary>
 
-| Method                                                       | Description   |
-| ------------------------------------------------------------ | ------------- |
-| `printBarCode(data, symbology, height, width, textPosition)` | Print barcode |
-| `printQRCode(data, moduleSize, errorLevel)`                  | Print QR code |
+| Method                                                       | Description                                     |
+| ------------------------------------------------------------ | ----------------------------------------------- |
+| `printBarCode(data, symbology, height, width, textPosition)` | Print 1D barcode                                |
+| `printQRCode(data, moduleSize, errorLevel)`                  | Print QR code                                   |
+| `print2DCode(data, symbology, moduleSize, errorLevel)`       | Print 2D barcode (1=QR, 2=PDF417, 3=DataMatrix) |
 
 </details>
 
@@ -224,54 +287,66 @@ const state = await updatePrinterState();
 <details>
 <summary><b>Raw / Paper</b></summary>
 
-| Method              | Description                      |
-| ------------------- | -------------------------------- |
-| `sendRAWData(data)` | Send raw ESC/POS byte array      |
-| `lineWrap(lines)`   | Feed paper by N lines            |
-| `cutPaper()`        | Cut paper (if cutter available)  |
-| `autoOutPaper()`    | Auto feed paper to tear position |
+| Method                  | Return            | Description                       |
+| ----------------------- | ----------------- | --------------------------------- |
+| `sendRAWData(data)`     | `Promise<void>`   | Send raw ESC/POS byte array       |
+| `lineWrap(lines)`       | `Promise<void>`   | Feed paper by N lines             |
+| `cutPaper()`            | `Promise<void>`   | Cut paper (if cutter available)   |
+| `autoOutPaper()`        | `Promise<void>`   | Auto feed paper to tear position  |
+| `getCutPaperTimes()`    | `Promise<number>` | Get total cutter usage count      |
+| `getPrinterBBMDistance()` | `Promise<number>` | Get black mark paper feed distance |
 
 </details>
 
 <details>
 <summary><b>Cash Drawer</b></summary>
 
-| Method         | Description                     |
-| -------------- | ------------------------------- |
-| `openDrawer()` | Open cash drawer (if available) |
+| Method               | Return            | Description                         |
+| -------------------- | ----------------- | ----------------------------------- |
+| `openDrawer()`       | `Promise<void>`   | Open cash drawer (if available)     |
+| `getDrawerStatus()`  | `Promise<number>` | Drawer state (0=closed, 1=open)     |
+| `getOpenDrawerTimes()` | `Promise<number>` | Total drawer open count             |
 
 </details>
 
 <details>
 <summary><b>Label</b></summary>
 
-| Method          | Description                      |
-| --------------- | -------------------------------- |
-| `labelLocate()` | ~~Not supported in PrinterX SDK~~ |
-| `labelOutput()` | ~~Not supported in PrinterX SDK~~ |
+| Method          | Description                                      |
+| --------------- | ------------------------------------------------ |
+| `labelLocate()` | Position the next label (set device to Label Mode first) |
+| `labelOutput()` | Output the label to the cutting position          |
+
+> **Note:** Enable Label Mode in device settings: Print Settings > Built-in Setting > Printer Mode > Label Mode.
 
 </details>
 
 <details>
 <summary><b>LCD Customer Display</b></summary>
 
-| Method                                | Description                                |
-| ------------------------------------- | ------------------------------------------ |
-| `sendLCDCommand(flag)`                | LCD command (1=init, 2=wake, 3=sleep, 4=clear) |
-| `sendLCDFillString(text, size, fill)` | Display text on LCD                        |
-| `sendLCDMultiString(texts, align)`    | Display multi-line text on LCD             |
-| `sendLCDBitmap(base64)`               | Display image on LCD                       |
+| Method                                    | Description                                         |
+| ----------------------------------------- | --------------------------------------------------- |
+| `sendLCDCommand(flag)`                    | LCD command (1=init, 2=wake, 3=sleep, 4=clear)      |
+| `sendLCDString(text)`                     | Display single-line text on LCD                     |
+| `sendLCDDoubleString(topText, bottomText)` | Display two lines on LCD                           |
+| `sendLCDFillString(text, size, fill)`     | Display text with custom size (fill=stretch to fit) |
+| `sendLCDMultiString(texts, align)`        | Display multi-line text (auto-sized by weight)      |
+| `sendLCDBitmap(base64)`                   | Display image on LCD (max 128x40px)                 |
+
+> Only available on mini-series desktop devices with a customer display (T1mini, T2mini, etc.).
 
 </details>
 
 <details>
 <summary><b>Transaction</b></summary>
 
-| Method                      | Description                                  |
-| --------------------------- | -------------------------------------------- |
-| `enterPrinterBuffer(clean)` | Start buffering commands                     |
-| `exitPrinterBuffer(commit)` | Exit buffer (commit=true to print)           |
-| `commitPrinterBuffer()`     | Print buffer contents (stays in buffer mode) |
+| Method                                  | Description                                  |
+| --------------------------------------- | -------------------------------------------- |
+| `enterPrinterBuffer(clean)`             | Start buffering commands                     |
+| `exitPrinterBuffer(commit)`             | Exit buffer (commit=true to print)           |
+| `commitPrinterBuffer()`                 | Print buffer contents (stays in buffer mode) |
+| `exitPrinterBufferWithCallback(commit)` | Exit buffer with print result callback       |
+| `commitPrinterBufferWithCallback()`     | Commit buffer with print result callback     |
 
 </details>
 
