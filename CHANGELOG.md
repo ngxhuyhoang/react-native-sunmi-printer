@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.4.1](https://github.com/ngxhuyhoang/react-native-sunmi-printer/compare/v0.4.0...v0.4.1) (2026-04-01)
+
 # [0.4.0](https://github.com/ngxhuyhoang/react-native-sunmi-printer/compare/v0.3.0...v0.4.0) (2026-03-31)
 
 
